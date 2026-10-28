@@ -55,7 +55,7 @@ def scan(
     Unreadable folders and files are skipped silently.
     """
     for root in roots:
-        for dirpath, dirnames, filenames in os.walk(root, onerror=lambda _e: None):
+        for dirpath, dirnames, filenames in os.walk(Path(root).resolve(), onerror=lambda _e: None):
             # Prune excluded folders in place so os.walk doesn't descend into them.
             dirnames[:] = [d for d in dirnames if d not in excludes]
             for name in filenames:

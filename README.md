@@ -6,9 +6,11 @@ then categorise and sort.
 ## Setup (Windows, PowerShell)
 
 ```powershell
-git clone <your-repo-url> doc-scanner
+cd $HOME
+mkdir projects -Force; cd projects
+git clone https://github.com/taffyinkl/doc-scanner.git
 cd doc-scanner
-py -3.12 -m venv .venv
+py -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -e ".[dev,extract]"
 code .
@@ -24,7 +26,7 @@ Accept VS Code's prompt to install the recommended extensions.
 ```powershell
 docscanner drives                       # list drives
 docscanner scan  "$HOME\Documents"      # count files per category
-docscanner dupes "$HOME\Documents" D:\  # find duplicate files
+docscanner dupes "$HOME\Documents" D:\  # find duplicates -> dupes.csv (-o to change)
 ```
 
 ## Development

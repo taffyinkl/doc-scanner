@@ -27,3 +27,13 @@ def test_find_duplicates(tmp_path: Path) -> None:
     groups = find_duplicates(scan([tmp_path]))
     assert len(groups) == 1
     assert {r.path.name for r in groups[0]} == {"one.txt", "two.txt"}
+
+
+def test_find_duplicates_large_files_differ_after_partial(tmp_path: Path) -> None:
+    head = b"x" * (64 * 1024)
+    (tmp_path / "a.bin").write_bytes(head + b"tail-1")
+    (tmp_path / "b.bin").write_bytes(head + b"tail-1")
+    (tmp_path / "c.bin").write_bytes(head + b"tail-2")  # same size and same first 64 KB
+    groups = find_duplicates(scan([tmp_path]))
+    assert len(groups) == 1
+    assert {r.path.name for r in groups[0]} == {"a.bin", "b.bin"}

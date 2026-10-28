@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "docscanner: scan folder",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "docscanner.cli",
+      "args": ["scan", "${input:folder}"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "docscanner: find duplicates",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "docscanner.cli",
+      "args": ["dupes", "${input:folder}"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "folder",
+      "type": "promptString",
+      "description": "Folder or drive to scan",
+      "default": "${userHome}\\Documents"
+    }
+  ]
+}

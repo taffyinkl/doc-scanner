@@ -16,6 +16,7 @@ from rich.progress import (
     SpinnerColumn,
     TaskID,
     TextColumn,
+    TimeElapsedColumn,
     TimeRemainingColumn,
 )
 from rich.table import Table
@@ -40,7 +41,7 @@ def drives() -> None:
 @app.command("scan")
 def scan_cmd(roots: Roots) -> None:
     """Count files per category under the given folders."""
-    counts = Counter(categorise(rec) for rec in scan(roots))
+    counts = Counter(categorise(rec) for rec in _listing_with_progress(roots))
     table = Table("Category", "Files")
     for category, n in counts.most_common():
         table.add_row(category, str(n))
@@ -48,16 +49,28 @@ def scan_cmd(roots: Roots) -> None:
 
 
 def _listing_with_progress(roots: list[Path]) -> list[FileRecord]:
-    """Walk the folders, showing a live count of files found."""
+    """Walk the folders, showing a live count of files found and the current folder."""
     records: list[FileRecord] = []
-    with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console) as bar:
-        task = bar.add_task("Listing files...")
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("Listing files: [bold]{task.completed:,}[/bold]"),
+        TimeElapsedColumn(),
+        TextColumn("[dim]{task.fields[folder]}"),
+        console=console,
+        transient=True,
+    ) as bar:
+        task = bar.add_task("list", folder="")
         for rec in scan(roots):
             records.append(rec)
-            if len(records) % 1000 == 0:
-                bar.update(task, description=f"Listing files... {len(records):,}")
+            if len(records) % 200 == 0:
+                bar.update(task, completed=len(records), folder=_shorten(rec.path.parent))
     console.print(f"Found {len(records):,} files.")
     return records
+
+
+def _shorten(path: Path, width: int = 60) -> str:
+    text = str(path)
+    return text if len(text) <= width else "..." + text[-(width - 3) :]
 
 
 @app.command()
@@ -74,6 +87,8 @@ def dupes(
         TextColumn("{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
+        TimeElapsedColumn(),
+        TextColumn("left"),
         TimeRemainingColumn(),
         console=console,
     ) as bar:
